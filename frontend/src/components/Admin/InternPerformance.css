@@ -1,0 +1,86 @@
+.intern-performance {
+  width: 100%;
+}
+
+.intern-performance h2 {
+  margin-bottom: 2rem;
+  color: #333;
+}
+
+.performance-table {
+  overflow-x: auto;
+}
+
+.performance-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.performance-table th,
+.performance-table td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.performance-table th {
+  background: #f9fafb;
+  font-weight: 600;
+  color: #374151;
+}
+
+.progress-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.mini-progress {
+  width: 100px;
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.mini-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #10b981, #059669);
+  border-radius: 10px;
+}
+
+.mini-progress-fill.blue {
+  background: linear-gradient(90deg, #3b82f6, #2563eb);
+}
+
+.eligibility-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.eligibility-badge.eligible {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.eligibility-badge.not-eligible {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.btn-view-details {
+  padding: 6px 12px;
+  background: #dbeafe;
+  color: #1e40af;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-view-details:hover {
+  background: #bfdbfe;
+}
