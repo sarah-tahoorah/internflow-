@@ -97,6 +97,7 @@ const getInternAnalytics = async (req, res) => {
       }
     });
   } catch (error) {
+    console.error('[GET_INTERN_ANALYTICS_ERROR]', error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -126,6 +127,7 @@ const getAdminAnalytics = async (req, res) => {
     const analytics = await Promise.all(analyticsPromises);
     res.json(analytics);
   } catch (error) {
+    console.error('[GET_ADMIN_ANALYTICS_ERROR]', error);
     res.status(500).json({ message: error.message });
   }
 };

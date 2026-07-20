@@ -17,6 +17,7 @@ const InternDashboard = () => {
     attendanceRate: 0
   });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   React.useEffect(() => {
     document.title = 'Intern Dashboard | InternFlow';
   }, []);
@@ -24,6 +25,7 @@ const InternDashboard = () => {
     fetchDashboardData();
   }, []);
   const fetchDashboardData = async () => {
+    setError('');
     try {
       const [tasksRes, performanceRes] = await Promise.all([
         API.get('/tasks'),
@@ -40,6 +42,7 @@ const InternDashboard = () => {
       setLoading(false);
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
+      setError(error.response?.data?.message || 'Failed to load dashboard data. Please try again.');
       setLoading(false);
     }
   };
@@ -54,6 +57,7 @@ const InternDashboard = () => {
           <h1>Welcome, {user.fullName}!</h1>
           <p className="subtitle">Internship Dashboard</p>
         </div>
+        {error && <div className="dashboard-error" role="alert">{error}</div>}
         {}
         <div className="dashboard-tabs">
           <button 

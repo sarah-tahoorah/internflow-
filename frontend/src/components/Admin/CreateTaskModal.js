@@ -34,6 +34,7 @@ const CreateTaskModal = ({ task, onClose, onSuccess }) => {
       setInterns(data);
     } catch (error) {
       console.error('Error fetching interns:', error);
+      setError(error.response?.data?.message || 'Failed to load interns. You can still create the task, but assignment options may be unavailable.');
     }
   };
   const handleSubmit = async (e) => {

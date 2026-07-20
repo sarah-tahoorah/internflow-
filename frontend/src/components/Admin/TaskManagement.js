@@ -1,22 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import API from '../../utils/api';
 import CreateTaskModal from './CreateTaskModal';
+import InlineError from '../InlineError';
 import './TaskManagement.css';
 const TaskManagement = ({ onUpdate }) => {
   const [tasks, setTasks] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [editTask, setEditTask] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   useEffect(() => {
     fetchTasks();
   }, []);
   const fetchTasks = async () => {
+    setError('');
     try {
       const { data } = await API.get('/tasks');
       setTasks(data);
       setLoading(false);
     } catch (error) {
       console.error('Error fetching tasks:', error);
+      setError(error.response?.data?.message || 'Failed to load tasks. Please try again.');
       setLoading(false);
     }
   };
@@ -27,7 +31,8 @@ const TaskManagement = ({ onUpdate }) => {
         fetchTasks();
         onUpdate();
       } catch (error) {
-        alert('Failed to delete task');
+        console.error('Error deleting task:', error);
+        alert(error.response?.data?.message || 'Failed to delete task');
       }
     }
   };
@@ -47,6 +52,7 @@ const TaskManagement = ({ onUpdate }) => {
   if (loading) return <div>Loading tasks...</div>;
   return (
     <div className="task-management">
+      <InlineError message={error} />
       <div className="section-header">
         <h2>Task Management</h2>
         <button 

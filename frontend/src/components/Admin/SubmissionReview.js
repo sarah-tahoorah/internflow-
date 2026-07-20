@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import API from '../../utils/api';
+import InlineError from '../InlineError';
 import './SubmissionReview.css';
 const SubmissionReview = ({ onUpdate }) => {
   const [submissions, setSubmissions] = useState([]);
@@ -7,16 +8,19 @@ const SubmissionReview = ({ onUpdate }) => {
   const [selectedSubmission, setSelectedSubmission] = useState(null);
   const [feedback, setFeedback] = useState('');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   useEffect(() => {
     fetchSubmissions();
   }, []);
   const fetchSubmissions = async () => {
+    setError('');
     try {
       const { data } = await API.get('/submissions');
       setSubmissions(data);
       setLoading(false);
     } catch (error) {
       console.error('Error fetching submissions:', error);
+      setError(error.response?.data?.message || 'Failed to load submissions. Please try again.');
       setLoading(false);
     }
   };
@@ -31,7 +35,8 @@ const SubmissionReview = ({ onUpdate }) => {
       fetchSubmissions();
       onUpdate();
     } catch (error) {
-      alert('Failed to update submission');
+      console.error('Error reviewing submission:', error);
+      alert(error.response?.data?.message || 'Failed to update submission');
     }
   };
   const filteredSubmissions = submissions.filter(sub => {
@@ -41,6 +46,7 @@ const SubmissionReview = ({ onUpdate }) => {
   if (loading) return <div>Loading submissions...</div>;
   return (
     <div className="submission-review">
+      <InlineError message={error} />
       <div className="section-header">
         <h2>Submission Review</h2>
         <div className="filter-buttons">

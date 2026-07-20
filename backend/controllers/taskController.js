@@ -30,6 +30,7 @@ const createTask = async (req, res) => {
     });
     res.status(201).json(task);
   } catch (error) {
+    console.error('[CREATE_TASK_ERROR]', error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -48,6 +49,7 @@ const getTasks = async (req, res) => {
       .sort({ createdAt: -1 });
     res.json(tasks);
   } catch (error) {
+    console.error('[GET_TASKS_ERROR]', error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -61,6 +63,7 @@ const getTaskById = async (req, res) => {
     }
     res.json(task);
   } catch (error) {
+    console.error('[GET_TASK_BY_ID_ERROR]', error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -103,6 +106,7 @@ const updateTask = async (req, res) => {
     );
     res.json(updatedTask);
   } catch (error) {
+    console.error('[UPDATE_TASK_ERROR]', error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -114,6 +118,7 @@ const deleteTask = async (req, res) => {
     }
     res.json({ message: 'Task removed' });
   } catch (error) {
+    console.error('[DELETE_TASK_ERROR]', error);
     res.status(500).json({ message: error.message });
   }
 };

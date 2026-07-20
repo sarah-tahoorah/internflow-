@@ -1,21 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import API from '../../utils/api';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import InlineError from '../InlineError';
 import './AdminAnalytics.css';
 const AdminAnalytics = () => {
   const [analytics, setAnalytics] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState('name');
+  const [error, setError] = useState('');
   useEffect(() => {
     fetchAnalytics();
   }, []);
   const fetchAnalytics = async () => {
+    setError('');
     try {
       const { data } = await API.get('/analytics/admin/overview');
       setAnalytics(data);
       setLoading(false);
     } catch (error) {
       console.error('Error fetching analytics:', error);
+      setError(error.response?.data?.message || 'Failed to load analytics. Please try again.');
       setLoading(false);
     }
   };
@@ -59,6 +63,7 @@ const AdminAnalytics = () => {
   if (loading) return <div className="loading">Loading analytics...</div>;
   return (
     <div className="admin-analytics">
+      <InlineError message={error} />
       <div className="analytics-header">
         <h2>📊 Intern Performance Overview</h2>
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>

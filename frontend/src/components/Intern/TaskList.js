@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import API from '../../utils/api';
 import TaskSubmissionModal from './TaskSubmissionModal';
+import InlineError from '../InlineError';
 import './TaskList.css';
 const TaskList = () => {
   const [tasks, setTasks] = useState([]);
@@ -8,10 +9,12 @@ const TaskList = () => {
   const [selectedTask, setSelectedTask] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   useEffect(() => {
     fetchData();
   }, []);
   const fetchData = async () => {
+    setError('');
     try {
       const [tasksRes, submissionsRes] = await Promise.all([
         API.get('/tasks'),
@@ -22,6 +25,7 @@ const TaskList = () => {
       setLoading(false);
     } catch (error) {
       console.error('Error fetching tasks:', error);
+      setError(error.response?.data?.message || 'Failed to load tasks. Please try again.');
       setLoading(false);
     }
   };
@@ -41,6 +45,7 @@ const TaskList = () => {
   return (
     <div className="task-list-container">
       <h2>My Tasks</h2>
+      <InlineError message={error} />
       {tasks.length === 0 ? (
         <p className="no-data">No tasks assigned yet.</p>
       ) : (

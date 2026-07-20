@@ -22,6 +22,7 @@ const submitTask = async (req, res) => {
     });
     res.status(201).json(submission);
   } catch (error) {
+    console.error('[SUBMIT_TASK_ERROR]', error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -32,6 +33,7 @@ const getMySubmissions = async (req, res) => {
       .sort({ submittedAt: -1 });
     res.json(submissions);
   } catch (error) {
+    console.error('[GET_MY_SUBMISSIONS_ERROR]', error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -43,6 +45,7 @@ const getAllSubmissions = async (req, res) => {
       .sort({ submittedAt: -1 });
     res.json(submissions);
   } catch (error) {
+    console.error('[GET_ALL_SUBMISSIONS_ERROR]', error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -63,6 +66,7 @@ const reviewSubmission = async (req, res) => {
     }
     res.json(submission);
   } catch (error) {
+    console.error('[REVIEW_SUBMISSION_ERROR]', error);
     res.status(500).json({ message: error.message });
   }
 };

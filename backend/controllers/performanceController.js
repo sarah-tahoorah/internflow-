@@ -77,6 +77,7 @@ const getPerformance = async (req, res) => {
       totalDays
     });
   } catch (error) {
+    console.error('[GET_PERFORMANCE_ERROR]', error);
     res.status(500).json({ message: error.message });
   }
 };

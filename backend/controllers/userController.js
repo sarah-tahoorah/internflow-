@@ -8,6 +8,7 @@ const getInterns = async (req, res) => {
     const interns = await User.find(query).select('fullName email domain');
     res.json(interns);
   } catch (error) {
+    console.error('[GET_INTERNS_ERROR]', error);
     res.status(500).json({ message: error.message });
   }
 };

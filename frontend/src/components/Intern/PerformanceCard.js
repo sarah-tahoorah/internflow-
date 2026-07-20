@@ -1,23 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import API from '../../utils/api';
+import InlineError from '../InlineError';
 import './PerformanceCard.css';
 const PerformanceCard = ({ userId }) => {
   const [performance, setPerformance] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   useEffect(() => {
     fetchPerformance();
   }, [userId]);
   const fetchPerformance = async () => {
+    setError('');
     try {
       const { data } = await API.get(`/performance/${userId}`);
       setPerformance(data);
       setLoading(false);
     } catch (error) {
       console.error('Error fetching performance:', error);
+      setError(error.response?.data?.message || 'Failed to load performance data. Please try again.');
       setLoading(false);
     }
   };
   if (loading) return <div>Loading performance...</div>;
+  if (error) return <div className="performance-card"><InlineError message={error} /></div>;
   if (!performance) return null;
   return (
     <div className="performance-card">

@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import API from '../../utils/api';
+import InlineError from '../InlineError';
 import './AttendanceWidget.css';
 const AttendanceWidget = () => {
   const [attendance, setAttendance] = useState([]);
   const [summary, setSummary] = useState(null);
   const [canCheckIn, setCanCheckIn] = useState(true);
   const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
   useEffect(() => {
     fetchAttendance();
     checkTodayAttendance();
   }, []);
   const fetchAttendance = async () => {
+    setError('');
     try {
       const { data } = await API.get('/attendance/my-attendance');
       setAttendance(data.slice(0, 7)); 
@@ -18,6 +21,7 @@ const AttendanceWidget = () => {
       setSummary(summaryRes.data);
     } catch (error) {
       console.error('Error fetching attendance:', error);
+      setError(error.response?.data?.message || 'Failed to load attendance. Please try again.');
     }
   };
   const checkTodayAttendance = async () => {
@@ -30,6 +34,7 @@ const AttendanceWidget = () => {
       setCanCheckIn(!todayRecord);
     } catch (error) {
       console.error('Error checking attendance:', error);
+      setError(error.response?.data?.message || 'Failed to load attendance. Please try again.');
     }
   };
   const handleCheckIn = async () => {
@@ -47,6 +52,7 @@ const AttendanceWidget = () => {
   return (
     <div className="attendance-widget">
       <h2>Attendance</h2>
+      <InlineError message={error} />
       {message && <div className="attendance-message">{message}</div>}
       <button 
         className="checkin-btn"

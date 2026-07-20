@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import API from '../../utils/api';
+import InlineError from '../InlineError';
 import './InternPerformance.css';
 const InternPerformance = () => {
   const [interns, setInterns] = useState([]);
   const [performances, setPerformances] = useState({});
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   useEffect(() => {
     fetchPerformanceData();
   }, []);
   const fetchPerformanceData = async () => {
+    setError('');
     try {
       const { data: submissions } = await API.get('/submissions');
       const uniqueInterns = [...new Set(submissions.map(s => s.internId))];
@@ -19,6 +22,7 @@ const InternPerformance = () => {
             const { data } = await API.get(`/performance/${intern._id}`);
             return { internId: intern._id, ...data, internInfo: intern };
           } catch (error) {
+            console.error(`Error fetching performance for intern ${intern._id}:`, error);
             return null;
           }
         });
@@ -31,10 +35,12 @@ const InternPerformance = () => {
       setLoading(false);
     } catch (error) {
       console.error('Error fetching performance:', error);
+      setError(error.response?.data?.message || 'Failed to load performance data. Please try again.');
       setLoading(false);
     }
   };
   if (loading) return <div>Loading performance data...</div>;
+  if (error) return <div className="intern-performance"><InlineError message={error} /></div>;
   const performanceList = Object.values(performances);
   if (performanceList.length === 0) {
     return <p className="no-data">No intern performance data available.</p>;
