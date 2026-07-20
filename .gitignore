@@ -26,3 +26,7 @@ Thumbs.db
 # Cache
 .cache/
 frontend/.cache/
+
+# Test coverage
+coverage/
+backend/coverage/
