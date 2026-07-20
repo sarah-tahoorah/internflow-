@@ -11,6 +11,9 @@ const register = async (req, res) => {
     if (!fullName || !email || !password) {
       return res.status(400).json({ message: 'Please provide all required fields' });
     }
+    if (typeof email !== 'string' || typeof password !== 'string' || typeof fullName !== 'string') {
+      return res.status(400).json({ message: 'Invalid input format' });
+    }
     if (role === 'admin') {
       if (!companyName || !companyName.trim()) {
         return res.status(400).json({ message: 'Company Name is required for admin registration' });
@@ -60,6 +63,9 @@ const login = async (req, res) => {
     const { email, password } = req.body;
     if (!email || !password) {
       return res.status(400).json({ message: 'Please provide email and password' });
+    }
+    if (typeof email !== 'string' || typeof password !== 'string') {
+      return res.status(400).json({ message: 'Invalid credentials' });
     }
     const user = await User.findOne({ email }).select('+password');
     if (!user || !(await user.comparePassword(password))) {
