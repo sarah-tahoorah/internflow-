@@ -22,6 +22,7 @@ const checkIn = async (req, res) => {
     });
     res.status(201).json(attendance);
   } catch (error) {
+    console.error('[CHECK_IN_ERROR]', error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -31,6 +32,7 @@ const getMyAttendance = async (req, res) => {
       .sort({ date: -1 });
     res.json(attendance);
   } catch (error) {
+    console.error('[GET_MY_ATTENDANCE_ERROR]', error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -53,6 +55,7 @@ const getAttendanceSummary = async (req, res) => {
       attendanceRate
     });
   } catch (error) {
+    console.error('[GET_ATTENDANCE_SUMMARY_ERROR]', error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -63,6 +66,7 @@ const getAllAttendance = async (req, res) => {
       .sort({ date: -1 });
     res.json(attendance);
   } catch (error) {
+    console.error('[GET_ALL_ATTENDANCE_ERROR]', error);
     res.status(500).json({ message: error.message });
   }
 };

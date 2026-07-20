@@ -18,6 +18,7 @@ const AdminDashboard = () => {
   });
   const [activeTab, setActiveTab] = useState('tasks');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   React.useEffect(() => {
     document.title = 'Admin Dashboard | InternFlow';
   }, []);
@@ -25,6 +26,7 @@ const AdminDashboard = () => {
     fetchDashboardStats();
   }, []);
   const fetchDashboardStats = async () => {
+    setError('');
     try {
       const [tasksRes, submissionsRes] = await Promise.all([
         API.get('/tasks'),
@@ -42,6 +44,7 @@ const AdminDashboard = () => {
       setLoading(false);
     } catch (error) {
       console.error('Error fetching stats:', error);
+      setError(error.response?.data?.message || 'Failed to load dashboard stats. Please try again.');
       setLoading(false);
     }
   };
@@ -56,6 +59,7 @@ const AdminDashboard = () => {
           <h1>Admin Dashboard</h1>
           <p className="subtitle">Manage Internship Program</p>
         </div>
+        {error && <div className="dashboard-error" role="alert">{error}</div>}
         <div className="stats-grid">
           <div className="stat-card admin">
             <h3>Total Tasks</h3>

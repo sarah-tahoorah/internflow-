@@ -52,6 +52,7 @@ const register = async (req, res) => {
       token: generateToken(user._id),
     });
   } catch (error) {
+    console.error('[REGISTER_ERROR]', error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -77,6 +78,7 @@ const login = async (req, res) => {
       token: generateToken(user._id),
     });
   } catch (error) {
+    console.error('[LOGIN_ERROR]', error);
     res.status(500).json({ message: error.message });
   }
 };

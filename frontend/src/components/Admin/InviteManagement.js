@@ -12,11 +12,13 @@ const InviteManagement = () => {
     fetchInvites();
   }, []);
   const fetchInvites = async () => {
+    setError('');
     try {
       const { data } = await API.get('/invites');
       setInvites(data);
     } catch (error) {
       console.error('Error fetching invites:', error);
+      setError(error.response?.data?.message || 'Failed to load invites. Please try again.');
     }
   };
   const handleSubmit = async (e) => {
@@ -48,6 +50,7 @@ const InviteManagement = () => {
           + Create Invite
         </button>
       </div>
+      {error && !showModal && <div className="error-message">{error}</div>}
       <div className="invites-table">
         <table>
           <thead>

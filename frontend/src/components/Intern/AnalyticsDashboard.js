@@ -10,11 +10,13 @@ const AnalyticsDashboard = () => {
   const { user } = useAuth();
   const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [dateRange, setDateRange] = useState({ startDate: '', endDate: '' });
   useEffect(() => {
     fetchAnalytics();
   }, []);
   const fetchAnalytics = async () => {
+    setError('');
     try {
       const params = dateRange.startDate && dateRange.endDate 
         ? `?startDate=${dateRange.startDate}&endDate=${dateRange.endDate}`
@@ -24,6 +26,7 @@ const AnalyticsDashboard = () => {
       setLoading(false);
     } catch (error) {
       console.error('Error fetching analytics:', error);
+      setError(error.response?.data?.message || 'Failed to load analytics. Please try again.');
       setLoading(false);
     }
   };
@@ -31,7 +34,7 @@ const AnalyticsDashboard = () => {
     fetchAnalytics();
   };
   if (loading) return <div className="loading">Loading analytics...</div>;
-  if (!analytics) return <div className="error">Failed to load analytics</div>;
+  if (!analytics) return <div className="error">{error || 'Failed to load analytics'}</div>;
   const COLORS = ['#10b981', '#ef4444', '#f59e0b', '#3b82f6'];
   const attendancePieData = [
     { name: 'Present', value: analytics.attendance.presentDays },

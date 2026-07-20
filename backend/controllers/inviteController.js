@@ -30,6 +30,7 @@ const createInvite = async (req, res) => {
       }
     });
   } catch (error) {
+    console.error('[CREATE_INVITE_ERROR]', error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -40,6 +41,7 @@ const getInvites = async (req, res) => {
       .sort({ createdAt: -1 });
     res.json(invites);
   } catch (error) {
+    console.error('[GET_INVITES_ERROR]', error);
     res.status(500).json({ message: error.message });
   }
 };

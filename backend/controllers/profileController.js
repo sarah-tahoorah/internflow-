@@ -74,6 +74,7 @@ const getUserProfile = async (req, res) => {
     };
     res.json(response);
   } catch (error) {
+    console.error('[GET_USER_PROFILE_ERROR]', error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -107,6 +108,7 @@ const updateUserProfile = async (req, res) => {
     }
     res.json(user);
   } catch (error) {
+    console.error('[UPDATE_USER_PROFILE_ERROR]', error);
     res.status(500).json({ message: error.message });
   }
 };

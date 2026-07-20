@@ -13,6 +13,7 @@ const enforceDomain = async (req, res, next) => {
     req.adminDomain = adminDomain;
     next();
   } catch (error) {
+    console.error('[ENFORCE_DOMAIN_ERROR]', error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -45,6 +46,7 @@ const validateInternAccess = async (req, res, next) => {
     }
     next();
   } catch (error) {
+    console.error('[VALIDATE_INTERN_ACCESS_ERROR]', error);
     res.status(500).json({ message: error.message });
   }
 };
