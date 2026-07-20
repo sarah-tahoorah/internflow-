@@ -2,6 +2,8 @@ const Task = require('../models/Task');
 const Submission = require('../models/Submission');
 const Attendance = require('../models/Attendance');
 const User = require('../models/User');
+const asyncHandler = require('../utils/asyncHandler');
+const { formatRate, PRESENT_STATUSES } = require('../utils/attendanceStats');
 const calculateEligibility = (user, attendanceRate, completionRate, totalTasks, totalDays) => {
   if (user.role !== 'intern') {
     return {
@@ -38,46 +40,38 @@ const calculateEligibility = (user, attendanceRate, completionRate, totalTasks, 
     }
   };
 };
-const getPerformance = async (req, res) => {
-  try {
-    const internId = req.params.internId;
-    const user = await User.findById(internId);
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-    if (user.role === 'admin') {
-      return res.status(403).json({ message: 'Performance metrics not available for admin users' });
-    }
-    const totalTasks = await Task.countDocuments({ assignedTo: internId });
-    const completedTasks = await Submission.countDocuments({ 
-      internId, 
-      status: 'approved' 
-    });
-    const taskCompletionRate = totalTasks > 0 
-      ? ((completedTasks / totalTasks) * 100).toFixed(2) 
-      : '0.00';
-    const totalDays = await Attendance.countDocuments({ internId });
-    const presentDays = await Attendance.countDocuments({ 
-      internId, 
-      status: { $in: ['present', 'late'] }
-    });
-    const attendanceRate = totalDays > 0 
-      ? ((presentDays / totalDays) * 100).toFixed(2) 
-      : '0.00';
-    const eligibility = calculateEligibility(user, attendanceRate, taskCompletionRate, totalTasks, totalDays);
-    res.json({
-      taskCompletionRate,
-      attendanceRate,
-      isEligible: eligibility.isEligible,
-      eligibilityStatus: eligibility.status,
-      eligibilityReasons: eligibility.reasons,
-      completedTasks,
-      totalTasks,
-      presentDays,
-      totalDays
-    });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+const getPerformance = asyncHandler(async (req, res) => {
+  const internId = req.params.internId;
+  const user = await User.findById(internId);
+  if (!user) {
+    return res.status(404).json({ message: 'User not found' });
   }
-};
+  if (user.role === 'admin') {
+    return res.status(403).json({ message: 'Performance metrics not available for admin users' });
+  }
+  const totalTasks = await Task.countDocuments({ assignedTo: internId });
+  const completedTasks = await Submission.countDocuments({ 
+    internId, 
+    status: 'approved' 
+  });
+  const taskCompletionRate = formatRate(completedTasks, totalTasks, '0.00');
+  const totalDays = await Attendance.countDocuments({ internId });
+  const presentDays = await Attendance.countDocuments({ 
+    internId, 
+    status: { $in: PRESENT_STATUSES }
+  });
+  const attendanceRate = formatRate(presentDays, totalDays, '0.00');
+  const eligibility = calculateEligibility(user, attendanceRate, taskCompletionRate, totalTasks, totalDays);
+  res.json({
+    taskCompletionRate,
+    attendanceRate,
+    isEligible: eligibility.isEligible,
+    eligibilityStatus: eligibility.status,
+    eligibilityReasons: eligibility.reasons,
+    completedTasks,
+    totalTasks,
+    presentDays,
+    totalDays
+  });
+});
 module.exports = { getPerformance, calculateEligibility };

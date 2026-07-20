@@ -3,8 +3,9 @@ const Submission = require('../models/Submission');
 const Attendance = require('../models/Attendance');
 const User = require('../models/User');
 const mongoose = require('mongoose');
-const getInternAnalytics = async (req, res) => {
-  try {
+const asyncHandler = require('../utils/asyncHandler');
+const { getAttendanceBreakdown, formatRate } = require('../utils/attendanceStats');
+const getInternAnalytics = asyncHandler(async (req, res) => {
     const internId = req.params.internId;
     const { startDate, endDate } = req.query;
     const user = await User.findById(internId);
@@ -19,11 +20,8 @@ const getInternAnalytics = async (req, res) => {
       dateFilter.createdAt = { $gte: new Date(startDate), $lte: new Date(endDate) };
     }
     const attendanceData = await Attendance.find({ internId, ...dateFilter });
-    const totalDays = attendanceData.length;
-    const presentDays = attendanceData.filter(a => a.status === 'present' || a.status === 'late').length;
-    const absentDays = attendanceData.filter(a => a.status === 'absent').length;
-    const lateDays = attendanceData.filter(a => a.status === 'late').length;
-    const attendancePercentage = totalDays > 0 ? ((presentDays / totalDays) * 100).toFixed(2) : 0;
+    const { totalDays, presentDays, absentDays, lateDays } = getAttendanceBreakdown(attendanceData);
+    const attendancePercentage = formatRate(presentDays, totalDays);
     const monthlyAttendance = await Attendance.aggregate([
       { $match: { internId: new mongoose.Types.ObjectId(internId) } },
       {
@@ -46,8 +44,8 @@ const getInternAnalytics = async (req, res) => {
       const task = tasks.find(t => t._id.toString() === sub.taskId.toString());
       return task && new Date(sub.submittedAt) > new Date(task.deadline);
     }).length;
-    const submissionRate = totalTasks > 0 ? ((submittedTasks / totalTasks) * 100).toFixed(2) : 0;
-    const taskCompletionRate = totalTasks > 0 ? ((approvedTasks / totalTasks) * 100).toFixed(2) : 0;
+    const submissionRate = formatRate(submittedTasks, totalTasks);
+    const taskCompletionRate = formatRate(approvedTasks, totalTasks);
     const weeklySubmissions = await Submission.aggregate([
       { $match: { internId: new mongoose.Types.ObjectId(internId) } },
       {
@@ -96,22 +94,17 @@ const getInternAnalytics = async (req, res) => {
         kpiStatus
       }
     });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-const getAdminAnalytics = async (req, res) => {
-  try {
+});
+const getAdminAnalytics = asyncHandler(async (req, res) => {
     const interns = await User.find({ role: 'intern' });
     const analyticsPromises = interns.map(async (intern) => {
       const tasks = await Task.find({ assignedTo: intern._id });
       const submissions = await Submission.find({ internId: intern._id });
       const attendance = await Attendance.find({ internId: intern._id });
-      const totalDays = attendance.length;
-      const presentDays = attendance.filter(a => a.status === 'present' || a.status === 'late').length;
-      const attendancePercentage = totalDays > 0 ? ((presentDays / totalDays) * 100).toFixed(2) : 0;
+      const { totalDays, presentDays } = getAttendanceBreakdown(attendance);
+      const attendancePercentage = formatRate(presentDays, totalDays);
       const approvedTasks = submissions.filter(s => s.status === 'approved').length;
-      const taskCompletionRate = tasks.length > 0 ? ((approvedTasks / tasks.length) * 100).toFixed(2) : 0;
+      const taskCompletionRate = formatRate(approvedTasks, tasks.length);
       return {
         internId: intern._id,
         name: intern.fullName,
@@ -125,10 +118,7 @@ const getAdminAnalytics = async (req, res) => {
     });
     const analytics = await Promise.all(analyticsPromises);
     res.json(analytics);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
+});
 function calculatePerformanceScore({ attendancePercentage, taskCompletionRate, submissionRate, lateSubmissions, totalTasks }) {
   const attendanceWeight = 0.3;
   const taskCompletionWeight = 0.4;
@@ -174,13 +164,11 @@ const exportAdminAnalyticsCSV = async (req, res) => {
       const tasks = await Task.find({ assignedTo: intern._id });
       const submissions = await Submission.find({ internId: intern._id });
       const attendance = await Attendance.find({ internId: intern._id });
-      const totalDays = attendance.length;
-      const presentDays = attendance.filter(a => a.status === 'present' || a.status === 'late').length;
-      const absentDays = attendance.filter(a => a.status === 'absent').length;
-      const attendancePercentage = totalDays > 0 ? ((presentDays / totalDays) * 100).toFixed(2) : 0;
+      const { totalDays, presentDays, absentDays } = getAttendanceBreakdown(attendance);
+      const attendancePercentage = formatRate(presentDays, totalDays);
       const approvedTasks = submissions.filter(s => s.status === 'approved').length;
       const pendingTasks = tasks.length - submissions.length;
-      const taskCompletionRate = tasks.length > 0 ? ((approvedTasks / tasks.length) * 100).toFixed(2) : 0;
+      const taskCompletionRate = formatRate(approvedTasks, tasks.length);
       return {
         name: intern.fullName,
         email: intern.email,
