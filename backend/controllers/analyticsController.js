@@ -11,6 +11,12 @@ const getInternAnalytics = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
+    const requester = req.user;
+    if (requester._id.toString() !== internId) {
+      if (requester.role !== 'admin' || user.domain !== requester.domain) {
+        return res.status(403).json({ message: 'Access denied: You are not authorized to view these analytics' });
+      }
+    }
     if (user.role === 'admin') {
       return res.status(403).json({ message: 'Analytics not available for admin users' });
     }

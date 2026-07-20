@@ -1,4 +1,5 @@
 const Attendance = require('../models/Attendance');
+const User = require('../models/User');
 const checkIn = async (req, res) => {
   try {
     const today = new Date();
@@ -36,7 +37,17 @@ const getMyAttendance = async (req, res) => {
 };
 const getAttendanceSummary = async (req, res) => {
   try {
-    const internId = req.params.internId || req.user._id;
+    const internId = req.params.internId || req.user._id.toString();
+    const requester = req.user;
+    if (requester._id.toString() !== internId.toString()) {
+      const target = await User.findById(internId).select('domain');
+      if (!target) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      if (requester.role !== 'admin' || target.domain !== requester.domain) {
+        return res.status(403).json({ message: 'Access denied: You are not authorized to view this attendance summary' });
+      }
+    }
     const totalDays = await Attendance.countDocuments({ internId });
     const presentDays = await Attendance.countDocuments({ 
       internId, 
